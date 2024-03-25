@@ -1,24 +1,21 @@
-from office365.runtime.auth.authentication_context import AuthenticationContext
-from office365.sharepoint.client_context import ClientContext
-from office365.sharepoint.lists.list import List
+import asyncio
 from Secrets import secrets
+from msgraph import GraphServiceClient
+from azure.identity import ClientSecretCredential
 
 # Parametros de SharePoint
-site_url = 'https://q7vf.sharepoint.com/sites/MSFT'
-secret_key = secrets.get('SECRET_KEY')
-client_id = secrets.get('CLIENT_ID')
-ctx = ''
+credential = ClientSecretCredential(
+    client_secret = secrets.get('CLIENT_SECRET'),
+    client_id = secrets.get('CLIENT_ID'),
+    tenant_id =  secrets.get('TENANT_ID')
+)
+scopes = ['https://graph.microsoft.com/.default']
 
-def createToken():
-    ctx_auth = AuthenticationContext(site_url)
-    if ctx_auth.acquire_token_for_app(client_id,secret_key):
-        ctx = ClientContext(site_url,ctx_auth)
-        web = ctx.web
-        ctx.load(web)
-        ctx.execute_query()
-    
-def createFolder():
-    root_folder = ctx.web.default_document_library().root_folder
-    folder = root_folder.folders.add(
-        "archive", color_hex=FolderColors.DarkGreen
-    ).execute_query()
+client = GraphServiceClient(credentials=credential, scopes=scopes)
+
+async def get_users():
+    users = await client.users.get()
+    if users and users.value:
+        for user in users.value:
+            print(user.id, user.user_principal_name)
+asyncio.run(get_users())
