@@ -11,8 +11,19 @@ async def main():
     cc = []
     bcc = []
     subject="Test Email Subject"
-
-    mailbericht = Mail.create_mail(sender, Mail.html, subject, recipient, cc, bcc)
+    html = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Smiley Face</title>
+        </head>
+        <body>
+            <div style="font-size: 48px; text-align: center;"></div>
+        </body>
+        </html>
+        """.replace("\n", "") 
+    
+    mailbericht = Mail.create_mail(sender, html, subject, recipient, cc, bcc)
 
     await Mail.send_mail(mailbericht,sender)
     # Create a list of tasks to run concurrently

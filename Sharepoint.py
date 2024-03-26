@@ -30,6 +30,6 @@ async def get_users():
                     print(user.id, ",", user.user_principal_name)
                     usersArray.append(user.id)
     except APIError as e:
-        print (f'Error: {e.error.message}')
+        print (e.error.message)
 
 

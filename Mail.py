@@ -22,26 +22,7 @@ credential = ClientSecretCredential(
 scopes = ['https://graph.microsoft.com/.default']
 client = GraphServiceClient(credentials=credential, scopes=scopes)
 
-# HTML content with a smiley
-
-
-def mail_body():
-    html = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Smiley Face</title>
-    </head>
-    <body>
-        <div style="font-size: 48px; text-align: center;">&#128512;</div>
-    </body>
-    </html>
-    """.replace("\n", "")
-    return html
-
-html = mail_body()
-
-def create_mail(from_email,body, subject, recipients, cc_recipient: list = [], bcc_recipient: list = []):
+def create_mail(from_email,body, subject, recipients, cc_recipient, bcc_recipient):
 
     # Sender
     sender = EmailAddress()
@@ -105,12 +86,11 @@ def create_mail(from_email,body, subject, recipients, cc_recipient: list = [], b
 
     return request_body
 
-async def send_mail(mailbericht,sender):
+async def send_mail(mail,sender):
     try:
-        await client.users.by_user_id(sender).send_mail.post(mailbericht)
+        await client.users.by_user_id(sender).send_mail.post(mail)
         #workaround 429 throttling error
         #time.sleep(1)
-        print("mail sent")
     # Print or handle the response here
     except Exception as e:
         print(e)
