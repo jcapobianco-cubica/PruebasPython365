@@ -10,6 +10,7 @@ from msgraph.generated.models.importance import Importance
 from msgraph.generated.models.item_body import ItemBody
 from msgraph.generated.models.recipient import Recipient
 from msgraph.generated.users.item.messages.messages_request_builder import MessagesRequestBuilder
+import time
 
 # Get token
 credential = ClientSecretCredential(
@@ -23,19 +24,22 @@ client = GraphServiceClient(credentials=credential, scopes=scopes)
 from_email="automatisering@contoso.com"
 
 # HTML content with a smiley
-html = """
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Smiley Face</title>
-</head>
-<body>
-    <div style="font-size: 48px; text-align: center;">&#128512;</div>
-</body>
-</html>
-""".replace("\n", "")
+html = ""
 
-def create_mail(bericht_html: str, titel, ontvangers: list, cc_ontvangers: list = [], bcc_ontvangers: list = [], from_email="automatisering@contoso.com"):
+def mail_body():
+    html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Smiley Face</title>
+    </head>
+    <body>
+        <div style="font-size: 48px; text-align: center;">&#128512;</div>
+    </body>
+    </html>
+    """.replace("\n", "")
+
+def create_mail(bericht_html: str, titel, ontvangers: list, cc_ontvangers: list = [], bcc_ontvangers: list = []):
     '''
     Create a valid mail object to be sent using Microsoft Graph API.
 
