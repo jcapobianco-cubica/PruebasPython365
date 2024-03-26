@@ -32,4 +32,4 @@ async def get_users():
     except APIError as e:
         print (f'Error: {e.error.message}')
 
-asyncio.run(get_users())
+
