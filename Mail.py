@@ -21,10 +21,10 @@ credential = ClientSecretCredential(
 scopes = ['https://graph.microsoft.com/.default']
 client = GraphServiceClient(credentials=credential, scopes=scopes)
 
-from_email="automatisering@contoso.com"
+from_email="jcapobianco@q7vf.onmicrosoft.com"
 
 # HTML content with a smiley
-html = ""
+
 
 def mail_body():
     html = """
@@ -38,6 +38,8 @@ def mail_body():
     </body>
     </html>
     """.replace("\n", "")
+
+html = mail_body()
 
 def create_mail(bericht_html: str, titel, ontvangers: list, cc_ontvangers: list = [], bcc_ontvangers: list = []):
     '''
@@ -121,6 +123,7 @@ async def send_mail(mailbericht):
         response = await client.users.by_user_id(from_email).send_mail.post(mailbericht)
         #workaround 429 throttling error
         time.sleep(1)
+        print("mail sent")
     # Print or handle the response here
     except Exception as e:
         print(e)
