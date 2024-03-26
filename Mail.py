@@ -10,6 +10,7 @@ from msgraph.generated.models.importance import Importance
 from msgraph.generated.models.item_body import ItemBody
 from msgraph.generated.models.recipient import Recipient
 from msgraph.generated.users.item.messages.messages_request_builder import MessagesRequestBuilder
+from msgraph.generated.users.item.user_item_request_builder import UserItemRequestBuilder
 import time
 
 # Get token
@@ -20,8 +21,6 @@ credential = ClientSecretCredential(
 )
 scopes = ['https://graph.microsoft.com/.default']
 client = GraphServiceClient(credentials=credential, scopes=scopes)
-
-from_email="jcapobianco@q7vf.onmicrosoft.com"
 
 # HTML content with a smiley
 
@@ -38,43 +37,31 @@ def mail_body():
     </body>
     </html>
     """.replace("\n", "")
+    return html
 
 html = mail_body()
 
-def create_mail(bericht_html: str, titel, ontvangers: list, cc_ontvangers: list = [], bcc_ontvangers: list = []):
-    '''
-    Create a valid mail object to be sent using Microsoft Graph API.
+def create_mail(from_email,body, subject, recipients, cc_recipient: list = [], bcc_recipient: list = []):
 
-    Parameters:
-    - bericht_html (str): The HTML content of the email body.
-    - titel (str): The subject of the email.
-    - ontvangers (list): A list of recipient email addresses.
-    - cc_ontvangers (list, optional): A list of email addresses to be included in the CC field.
-    - bcc_ontvangers (list, optional): A list of email addresses to be included in the BCC field.
-    - versturende_email (str, optional): The email address of the sender.
-
-    Returns:
-    SendMailPostRequestBody: An object representing the mail to be sent.
-    '''
     # Sender
     sender = EmailAddress()
     sender.address = from_email
     from_recipient = Recipient()
     from_recipient.email_address = sender
 
-    recipients = []
-    for ontvanger in ontvangers:
+    varrecipients = []
+    for recipient in recipients:
         # Add recipient per recipient
         recipient_email = EmailAddress()
-        recipient_email.address = ontvanger
+        recipient_email.address = recipient
         to_recipient = Recipient()
         to_recipient.email_address = recipient_email
-        recipients.append(to_recipient)
+        varrecipients.append(to_recipient)
 
     # CC
-    if cc_ontvangers != []:
+    if cc_recipient != []:
         cc_recipients = []
-        for cc_ontvanger in cc_ontvangers:
+        for cc_ontvanger in cc_recipient:
             # Add cc_recipient per recipient
             cc_recipient_email = EmailAddress()
             cc_recipient_email.address = cc_ontvanger
@@ -83,9 +70,9 @@ def create_mail(bericht_html: str, titel, ontvangers: list, cc_ontvangers: list 
             cc_recipients.append(cc_recipient)
 
     # BCC
-    if bcc_ontvangers != []:
+    if bcc_recipient != []:
         bcc_recipients = []
-        for bcc_ontvanger in bcc_ontvangers:
+        for bcc_ontvanger in bcc_recipient:
             # Add bcc_recipient per recipient
             bcc_recipient_email = EmailAddress()
             bcc_recipient_email.address = bcc_ontvanger
@@ -95,19 +82,19 @@ def create_mail(bericht_html: str, titel, ontvangers: list, cc_ontvangers: list 
 
     # Message body
     email_body = ItemBody()
-    email_body.content = bericht_html
+    email_body.content = body
     email_body.content_type = BodyType.Html
 
     # Message object
     message = Message()
-    message.subject = titel
-    message.from_escaped = from_recipient
-    message.to_recipients = recipients
+    message.subject = subject
+    message.from_ = from_recipient
+    message.to_recipients = varrecipients
 
-    if cc_ontvangers != []:
+    if cc_recipient != []:
         message.cc_recipients = cc_recipients
 
-    if bcc_ontvangers != []:
+    if bcc_recipient != []:
         message.bcc_recipients = bcc_recipients
 
     message.body = email_body
@@ -118,11 +105,11 @@ def create_mail(bericht_html: str, titel, ontvangers: list, cc_ontvangers: list 
 
     return request_body
 
-async def send_mail(mailbericht):
+async def send_mail(mailbericht,sender):
     try:
-        response = await client.users.by_user_id(from_email).send_mail.post(mailbericht)
+        await client.users.by_user_id(sender).send_mail.post(mailbericht)
         #workaround 429 throttling error
-        time.sleep(1)
+        #time.sleep(1)
         print("mail sent")
     # Print or handle the response here
     except Exception as e:
