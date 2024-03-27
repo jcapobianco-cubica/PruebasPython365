@@ -1,8 +1,8 @@
-import secrets
 import Mail
 import Sharepoint
-import asyncio
 import Intune
+import User
+import asyncio
 
 #asyncio.run(Sharepoint.get_users())
 
@@ -10,4 +10,6 @@ import Intune
 
 #asyncio.run(Intune.get_devices())
 
-print(asyncio.run(Intune.get_devices()))
+#print(asyncio.run(Intune.get_devices()))
+
+print(asyncio.run(User.get_users()))

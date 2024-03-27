@@ -1,5 +1,5 @@
 import asyncio
-from Secrets import secrets
+from Secret import secrets
 from msgraph import GraphServiceClient
 from azure.identity import ClientSecretCredential
 from kiota_abstractions.api_error import APIError

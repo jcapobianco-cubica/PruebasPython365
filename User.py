@@ -27,10 +27,9 @@ if not token_result:
     token_result = client.acquire_token_for_client(scopes=scope)
     access_token = 'Bearer ' + token_result['access_token']
 
-
-async def get_devices():
+async def get_users():
     graph_results=[]
-    url= 'https://graph.microsoft.com/v1.0/deviceManagement/managedDevices'
+    url= 'https://graph.microsoft.com/v1.0/users'
     headers = {
         'Authorization': access_token
     }

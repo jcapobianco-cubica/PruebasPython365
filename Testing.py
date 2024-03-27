@@ -1,5 +1,5 @@
 import asyncio
-from Secrets import secrets
+from Secret import secrets
 from azure.identity import ClientSecretCredential
 from msgraph import GraphServiceClient
 from msgraph.generated.users.item.send_mail.send_mail_post_request_body import SendMailPostRequestBody
