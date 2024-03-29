@@ -4,83 +4,33 @@ from Secret import secrets
 import requests
 from kiota_abstractions.api_error import APIError
 import msal
+import Authentication
 
-# Get token
-client_secret = secrets.get('CLIENT_SECRET')
-client_id = secrets.get('CLIENT_ID')
-tenant_id =  secrets.get('TENANT_ID')
-authority= 'https://login.microsoftonline.com/{}'.format(secrets.get('TENANT_ID'))
-scope = ['https://graph.microsoft.com/.default']
-
-# Create an MSAL instance providing the client_id, authority and client_credential parameters
-client = msal.ConfidentialClientApplication(client_id, authority=authority, client_credential=client_secret)
-
-# First, try to lookup an access token in cache
-token_result = client.acquire_token_silent(scope, account=None)
-access_token=''
-
-# If the token is available in cache, save it to a variable
-if token_result:
-    access_token = 'Bearer ' + token_result['access_token']
-
-# If the token is not available in cache, acquire a new one from Azure AD and save it to a variable
-if not token_result:
-    token_result = client.acquire_token_for_client(scopes=scope)
-    access_token = 'Bearer ' + token_result['access_token']
-
-async def get_sites():
-    graph_results=[]
-    url= 'https://graph.microsoft.com/v1.0/sites/getAllSites'
-    headers = {
+access_token=Authentication.get_token()
+headers = {
         'Authorization': access_token,
         'Content-Type': 'application/json'
     }
-    while url:
-        try:
-            graph_result = requests.get(url=url, headers=headers).json()
-            graph_results.extend(graph_result['value'])
-            url = graph_result['@odata.nextLink']        
-        except:
-            break
-    return graph_results
 
-async def get_countsites():
-    graph_results=[]
-    url= 'https://graph.microsoft.com/v1.0/sites/getAllSites'
-    headers = {
-        'Authorization': access_token,
-        'Content-Type': 'application/json'
-    }
-    while url:
-        try:
-            graph_result =  requests.get(url=url, headers=headers).json()
-            graph_results.extend(graph_result['value'])
-            url = graph_result['@odata.nextLink']        
-        except:
-            break
-    return len(graph_results)
+def get_searchSite(siteName):
+    url='https://graph.microsoft.com/v1.0/sites?search={}'.format(siteName)    
+    graph_result = requests.get(url=url, headers=headers).json()
+    return graph_result['value'][0]['id'].split(",")[1]
 
-async def get_siteLists(site):
-    graph_results=[]
-    url= 'https://graph.microsoft.com/v1.0/sites/{}/lists'.format(site)
-    headers = {
-        'Authorization': access_token,
-        'Content-Type': 'application/json'
-    }
-    while url:
-        try:
-            graph_result = requests.get(url=url, headers=headers).json()
-            graph_results.extend(graph_result['value'])
-            url = graph_result['@odata.nextLink']        
-        except:
-            break
-    return graph_results
+def get_searchList(siteName,listName):
+    siteId=get_searchSite(siteName)
+    url='https://graph.microsoft.com/v1.0/sites/{}/lists/{}'.format(siteId,listName)
+    graph_result = requests.get(url=url, headers=headers).json()
+    return graph_result['id']
 
-async def get_listItems(site,list):
+def get_listItems(siteName,listName):
     graph_results=[]
     listExport=[]
-    
-    url= 'https://graph.microsoft.com/v1.0/sites/{}/lists/{}/items?expand=fields'.format(site,list)
+    siteId=get_searchSite(siteName)
+    listId=get_searchList(siteName,listName)
+    print(siteId)
+    print(listId)
+    url= 'https://graph.microsoft.com/v1.0/sites/{}/lists/{}/items?expand=fields'.format(siteId,listId)
     headers = {
         'Authorization': access_token,
         'Content-Type': 'application/json'
@@ -100,5 +50,26 @@ async def get_listItems(site,list):
             jsonExport[y]=x['fields'][y]            
         listExport.append(jsonExport)
 
-    return listExport
-    #return json.dumps(listExport)
+    return json.dumps(listExport)
+        
+async def del_emptyList(siteName, listName):
+    url= 'https://graph.microsoft.com/v1.0/sites/{}/lists/{}/items?expand=fields'.format(site,list)
+    headers = {
+        'Authorization': access_token,
+        'Content-Type': 'application/json'
+    }  
+
+async def get_drives(siteName):
+    url= 'https://graph.microsoft.com/v1.0/sites/{}/lists/{}/items?expand=fields'.format(siteName,list)
+    headers = {
+        'Authorization': access_token,
+        'Content-Type': 'application/json'
+    }  
+
+async def post_createFile(siteId,folder,fileName):
+    url= 'https://graph.microsoft.com/v1.0/sites/{}/drive/items/{}:/{}:/content'.format(siteId,folder,fileName)
+
+async def get_permissions():
+    url=''
+
+print(get_listItems('MSFT','Usuarios activos'))
