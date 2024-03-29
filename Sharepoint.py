@@ -28,8 +28,6 @@ def get_listItems(siteName,listName):
     listExport=[]
     siteId=get_searchSite(siteName)
     listId=get_searchList(siteName,listName)
-    print(siteId)
-    print(listId)
     url= 'https://graph.microsoft.com/v1.0/sites/{}/lists/{}/items?expand=fields'.format(siteId,listId)
     headers = {
         'Authorization': access_token,
@@ -41,9 +39,7 @@ def get_listItems(siteName,listName):
             graph_results.extend(graph_result['value'])
             url = graph_result['@odata.nextLink']                   
         except:
-            break
-
-    
+            break    
     for x in graph_results:
         jsonExport={}        
         for y in x['fields']:
