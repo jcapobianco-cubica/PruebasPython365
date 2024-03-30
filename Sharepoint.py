@@ -67,5 +67,3 @@ async def post_createFile(siteId,folder,fileName):
 
 async def get_permissions():
     url=''
-
-print(get_listItems('MSFT','Usuarios activos'))

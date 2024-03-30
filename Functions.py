@@ -1,11 +1,13 @@
 import asyncio
 import Authentication
 import Sharepoint
+import User
 from pandas.tseries.offsets import BMonthEnd
 from datetime import timedelta,date,datetime
+import json
 
 def get_licences():
-    licences=[
+    licences="""[
     {
         "GUID": "e4654015-5daf-4a48-9b37-4f309dddd88b",
         "Titulo": "Advanced Communications"
@@ -1646,8 +1648,9 @@ def get_licences():
         "GUID": "c7e9d9e6-1981-4bf3-bb50-a5bdfaa06fb2",
         "Titulo": "Tienda Windows para Business EDU Faculty"
     }
-    ]
-    return licences
+    ]"""
+    licences_dict=json.loads(licences)
+    return licences_dict
 
 def get_antepenultimateBusinessDay():
     d=datetime.now()
@@ -1669,8 +1672,18 @@ def get_antepenultimateBusinessDay():
     return d==antepenultimateBusinessDay
 
 
-def get_userLicencesReport():
-    if(get_antepenultimateBusinessDay):
-        Sharepoint.get_listItems('Usuarios activos','MSFT')
+def get_userLicensesReport():
+    
+    if(get_antepenultimateBusinessDay()==False):
+        #Sharepoint.get_listItems('MSFT','Usuarios activos'))        
+        users=asyncio.run(User.get_assignedLicenses())
+        for x in users:
+            assignedLicenses=x['assignedLicenses']
+            productName=''
+            for y in assignedLicenses:
+                output_dict = [x for x in get_licences() if x['GUID'] == y['skuId']]
+                productName=productName+output_dict[0]['Titulo']
 
-get_userLicencesReport()
+
+
+get_userLicensesReport()

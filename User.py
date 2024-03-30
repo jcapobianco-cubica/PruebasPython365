@@ -23,7 +23,7 @@ async def get_users():
             break
     return graph_results
 
-async def get_assignedLicences():
+async def get_assignedLicenses():
     graph_results=[]
     filter='$filter=assignedLicenses/$count ne 0'
     count='$count=true'
