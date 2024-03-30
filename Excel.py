@@ -12,7 +12,7 @@ def post_createFile():
     #if(os.path.isfile('hello.xlsx')==False):
     workbook = xlsxwriter.Workbook('hello.xlsx')
     worksheet = workbook.add_worksheet()
-    worksheet.add_table({'name': 'Usuarios',
+    worksheet.add_table('A1:G2', {'name': 'Usuarios',
                                   'columns': [{'header': 'Product'},
                                           {'header': 'Usuario'},
                                           {'header': 'Creado'},
