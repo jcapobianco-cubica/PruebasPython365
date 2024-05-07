@@ -1,35 +1,69 @@
 import asyncio
+import json
 from Secret import secrets
-from msgraph import GraphServiceClient
-from azure.identity import ClientSecretCredential
+import requests
 from kiota_abstractions.api_error import APIError
+import msal
+import Authentication
 
-# Parametros de API
-credential = ClientSecretCredential(
-    client_secret = secrets.get('CLIENT_SECRET'),
-    client_id = secrets.get('CLIENT_ID'),
-    tenant_id =  secrets.get('TENANT_ID')
-)
-scopes = ['https://graph.microsoft.com/.default']
+access_token=Authentication.get_token()
+headers = {
+        'Authorization': access_token,
+        'Content-Type': 'application/json'
+    }
 
-client = GraphServiceClient(credentials=credential, scopes=scopes)
+def get_searchSite(siteName):
+    url='https://graph.microsoft.com/v1.0/sites?search={}'.format(siteName)    
+    graph_result = requests.get(url=url, headers=headers).json()
+    return graph_result['value'][0]['id'].split(",")[1]
 
-usersArray=[]
+def get_searchList(siteName,listName):
+    siteId=get_searchSite(siteName)
+    url='https://graph.microsoft.com/v1.0/sites/{}/lists/{}'.format(siteId,listName)
+    graph_result = requests.get(url=url, headers=headers).json()
+    return graph_result['id']
 
-async def get_users():
-    try:
-        users = await client.users.get()
-        if users and users.value:
-            for user in users.value:
-                print(user.id, ",", user.user_principal_name)
-                usersArray.append(user.id)
-        while users is not None and users.odata_next_link is not None:
-            users = await client.users.with_url(users.odata_next_link).get()
-            if users and users.value:
-                for user in users.value:
-                    print(user.id, ",", user.user_principal_name)
-                    usersArray.append(user.id)
-    except APIError as e:
-        print (e.error.message)
+def get_listItems(siteName,listName):
+    graph_results=[]
+    listExport=[]
+    siteId=get_searchSite(siteName)
+    listId=get_searchList(siteName,listName)
+    url= 'https://graph.microsoft.com/v1.0/sites/{}/lists/{}/items?expand=fields'.format(siteId,listId)
+    headers = {
+        'Authorization': access_token,
+        'Content-Type': 'application/json'
+    }    
+    while url:
+        try:
+            graph_result = requests.get(url=url, headers=headers).json()
+            graph_results.extend(graph_result['value'])
+            url = graph_result['@odata.nextLink']                   
+        except:
+            break    
+    for x in graph_results:
+        jsonExport={}        
+        for y in x['fields']:
+            jsonExport[y]=x['fields'][y]            
+        listExport.append(jsonExport)
 
+    return json.dumps(listExport)
+        
+async def del_emptyList(siteName, listName):
+    url= 'https://graph.microsoft.com/v1.0/sites/{}/lists/{}/items?expand=fields'.format(site,list)
+    headers = {
+        'Authorization': access_token,
+        'Content-Type': 'application/json'
+    }  
 
+async def get_drives(siteName):
+    url= 'https://graph.microsoft.com/v1.0/sites/{}/lists/{}/items?expand=fields'.format(siteName,list)
+    headers = {
+        'Authorization': access_token,
+        'Content-Type': 'application/json'
+    }  
+
+async def post_createFile(siteId,folder,fileName):
+    url= 'https://graph.microsoft.com/v1.0/sites/{}/drive/items/{}:/{}:/content'.format(siteId,folder,fileName)
+
+async def get_permissions():
+    url=''
