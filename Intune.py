@@ -3,6 +3,8 @@ from Secret import secrets
 import requests
 from kiota_abstractions.api_error import APIError
 import msal
+import jsonpatch
+import json
 
 # Get token
 client_secret = secrets.get('CLIENT_SECRET')
@@ -42,3 +44,22 @@ async def get_devices():
         except:
             break
     return graph_results
+
+async def patch_device():
+    graph_results=[]
+    urlEndpoint= 'https://graph.microsoft.com/beta/deviceManagement/managedDevices'
+    head = {
+        'Authorization': access_token,
+        'Content-Type':'application/json'
+    }    
+    #TODO solucionar para que recorra una lista de mas de 1000 elementos
+    devices = await get_devices()
+    print(devices)
+    for d in devices:
+        print(urlEndpoint+'/'+d['id'])
+        if d['operatingSystem'] == 'Windows':
+            payload={'notes':'Equipo Renting Antigüedad: 25/04/2024'}
+            url=urlEndpoint+'/'+d['id']
+            graph_result = requests.patch(url, data=json.dumps(payload), headers=head )
+            print(graph_result)
+            print(graph_result.content)

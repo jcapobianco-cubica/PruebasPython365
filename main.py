@@ -11,5 +11,5 @@ import asyncio
 #asyncio.run(Intune.get_devices())
 
 #print(asyncio.run(Intune.get_devices()))
-
-print(asyncio.run(User.get_users()))
+#Intune.patch_device
+asyncio.run(Intune.patch_device())
